@@ -1,0 +1,2 @@
+# Los datos capturados (snapshots, PDFs E-14, manifiestos) se generan al ejecutar las herramientas.
+# NO se versionan (ver .gitignore): son pesados y reproducibles.

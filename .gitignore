@@ -1,0 +1,25 @@
+# --- Datos capturados (pesados y regenerables; NO versionar) ---
+data/**
+!data/.gitkeep
+
+# E-14 PDFs y JSON grandes, snapshots, manifiestos, estados de integridad
+*.pdf
+!informe/*.pdf
+allTransmissionCodes.json
+state_*.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Temporales / SO / editores ---
+.tmp/
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

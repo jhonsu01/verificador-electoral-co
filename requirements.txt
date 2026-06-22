@@ -1,0 +1,10 @@
+# El nucleo (registraduria_tracker.py, e14_auditor.py) usa SOLO la libreria
+# estandar de Python 3.10+. No requiere instalar nada.
+#
+# Las siguientes dependencias son opcionales:
+
+# Generacion del informe en PDF (generar_informe_pdf.py)
+reportlab>=4.0
+
+# Verificacion/lectura de PDFs (opcional, para inspeccion manual)
+# pypdf>=4.0
