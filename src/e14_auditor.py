@@ -341,16 +341,25 @@ VALIDEZ_CSV = os.path.join(E14_DIR, "validez_temporal.csv")
 
 
 def _http_last_modified(path: str) -> str | None:
+    """Devuelve Last-Modified. Akamai a veces omite el header en HEAD para actas
+    recien publicadas; en ese caso se cae a GET (que suele traerlo). Reintenta."""
     url = path if path.startswith("http") else BASE + path
     for attempt in range(MAX_RETRIES):
-        try:
-            req = urllib.request.Request(url, headers=HEADERS, method="HEAD")
-            with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-                return r.headers.get("Last-Modified")
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
-            if isinstance(e, urllib.error.HTTPError) and e.code == 404:
-                return None
-            time.sleep(min(2 ** attempt, 8))
+        for method in ("HEAD", "GET"):
+            try:
+                req = urllib.request.Request(url, headers=HEADERS, method=method)
+                with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                    lm = r.headers.get("Last-Modified")
+                    if method == "GET":
+                        r.read(64)  # drenar un poco; no necesitamos el cuerpo
+                    if lm:
+                        return lm
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    return None
+            except (urllib.error.URLError, TimeoutError):
+                pass
+        time.sleep(min(1 + attempt, 5))
     return None
 
 
@@ -409,11 +418,13 @@ def cmd_verify_times(args) -> None:
              if n.get("idTransmissionCodeStatus") == 11
              and (args.dept is None or n["idDepartmentCode"] == args.dept)
              and (args.muni is None or n["municipalityCode"] == args.muni)]
-    # cache incremental de Last-Modified ya consultados
+    # cache incremental: SOLO se cachean exitos (con fecha). Los fallos (sin
+    # Last-Modified) no se persisten -> se reintentan en la siguiente corrida.
     cache = {}
     if os.path.exists(TIMES_CSV):
         for row in csv.DictReader(open(TIMES_CSV, encoding="utf-8")):
-            cache[row["name_hash"]] = row["pub_col"]
+            if row["pub_col"]:
+                cache[row["name_hash"]] = row["pub_col"]
     pend = [n for n in nodes if n["expectedName"][:-4] not in cache]
     print(f"[verify-times] {len(nodes):,} E-14 (dept={args.dept or 'todos'} "
           f"muni={args.muni or 'todos'}) | en cache: {len(nodes)-len(pend):,} | "
@@ -432,10 +443,12 @@ def cmd_verify_times(args) -> None:
     with cf.ThreadPoolExecutor(max_workers=args.workers) as ex:
         for n, lm in ex.map(head, pend):
             pub = _lm_to_col(lm).isoformat() if lm else ""
+            done += 1
+            if not pub:        # fallo: no persistir, se reintenta luego
+                continue
             cache[n["expectedName"][:-4]] = pub
             w.writerow([n["idDepartmentCode"], n["municipalityCode"], n["idZoneCode"],
                         n["standCode"], n["numberStand"], n["expectedName"][:-4], pub])
-            done += 1
             if done % 500 == 0:
                 print(f"  ... {done}/{len(pend)}"); fh.flush()
     fh.close()
