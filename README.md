@@ -98,14 +98,28 @@ Detalles completos en [`docs/fuentes-de-datos.md`](docs/fuentes-de-datos.md).
 
 ## 📊 Resultados de la auditoría 2026 (2ª vuelta)
 
-- **120.611 actas E-14** verificadas.
-- **99,90%** temporalmente válidas; **0** publicadas antes del cierre de urnas.
-- **0** municipios con "más E-14 que mesas informadas".
-- **Veredicto:** resultado confiable e íntegro; el mecanismo de publicación es
-  perfectible (las actas se publican como **imágenes sin metadatos ni firma**).
+Sobre **122.019 actas E-14** (publicación ≈ 100% de las 122.020 mesas):
 
-Informe completo y recomendaciones a la Registraduría en
+| Verificación | Resultado |
+| --- | --- |
+| **Conteo (100% mesas)** | De La Espriella 49,66% vs Cepeda 48,70% (dif. ≈ 250.820 votos) |
+| **Reconciliación conteo ↔ E-14** | 0 municipios con "más E-14 que mesas informadas" |
+| **Integridad (re-hash vs línea base)** | **0 republicaciones** — las 120.611 actas de la 1ª captura conservan el mismo hash |
+| **Validez temporal** | 99,04% válidas; **0 publicadas antes del cierre de urnas**; 125 flags benignos (≤ 9 min = artefacto de muestreo) |
+| **Sin timestamp** | 1.042 (0,85%), en su mayoría zona 99 (puestos especiales/exterior) cuyo CDN no expone `Last-Modified` — limitación del portal, no anomalía |
+
+> **Veredicto:** resultado **confiable e íntegro**; ninguna acta se publicó antes del
+> cierre y ninguna fue alterada tras publicarse. La única debilidad es de
+> **transparencia técnica**: las actas se publican como **imágenes sin metadatos ni
+> firma**, por lo que el ciudadano que descarga un E-14 no puede saber, desde el propio
+> archivo, cuándo fue creado ni verificar su autenticidad de forma autónoma.
+
+Informe completo y **9 recomendaciones** a la Registraduría en
 [`informe/`](informe/Informe_Auditoria_Digital_E14_2026.pdf).
+
+> ℹ️ **Nota de uso:** ejecuta `verify-times` **desde la carpeta que contiene el caché**
+> (`data/e14/mesa_times.csv`); arrancar con un caché vacío re-pide ~122k cabeceras `HEAD`
+> y el CDN (Akamai) las estrangula, produciendo falsos `SIN_FECHA`.
 
 ## ⚖️ Aviso
 
