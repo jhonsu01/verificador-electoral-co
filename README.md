@@ -1,5 +1,9 @@
 # 🗳️ Verificador Electoral — Registraduría (Colombia)
 
+<div align="center">
+  <img src="./assets/banner.png" alt="verificador-electoral-co  Banner" width="100%" />
+  </div>
+
 Herramientas **abiertas, reproducibles y deterministas** para auditar de forma
 independiente la divulgación de resultados y los formularios **E-14** de las
 elecciones colombianas. Construido durante las **Presidenciales 2026 — Segunda
